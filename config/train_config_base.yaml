@@ -1,0 +1,54 @@
+# 数据集路径
+data_path: data/dataset.pt
+
+# 模型保存目录和checkpoint路径
+output_dir: save_models
+checkpoint_path: checkpoints
+log_dir: logs
+
+# 模型参数
+num_layers: 4
+d_model: 128
+nhead: 8
+dim_feedforward: 1024
+dropout: 0.1
+num_classes: 6
+
+# 测试集大小
+test_size: 0.15
+
+# 特征工程参数
+n_fft: 256
+win_length: 256
+hop_length: 256
+
+# 数据增强参数
+augment_train_data: False
+augment_percentage: 0.4
+
+# 训练过程参数
+num_epochs: 200
+per_device_train_batch_size: 2
+per_device_eval_batch_size: 2
+weight_decay: 0.01
+gradient_accumulation_steps: 8
+learning_rate: 0.0001
+device: cuda
+ckpt_epoch_frequency: 1
+max_grad_norm: -1.0
+
+# 学习率调度器
+scheduler:
+  step_size: 2
+  gamma: 0.1
+
+# 训练策略
+evaluation_strategy: epoch
+logging_dir: ./logs
+save_strategy: epoch
+resume_from_checkpoint: Null
+
+
+# wandb选项
+report_to: "wandb"  # 可选
+wandb_project: "modulation_classification"  # 可选

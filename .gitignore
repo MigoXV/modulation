@@ -1,0 +1,9 @@
+*.png
+*.pt
+
+.vscode
+__pycache__
+
+data
+wandb
+logs

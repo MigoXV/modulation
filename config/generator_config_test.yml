@@ -1,0 +1,23 @@
+
+sample_rate: 3200000
+total_samples: 3200
+selected_samples: 3200
+
+carrier_freq: 20000
+carrier_peak_to_peak: 1.0
+
+ma_bottom: 0.5
+ma_top: 1.0
+
+mf_bottom: 1.0
+mf_top: 5.0
+F_max: 2000
+
+h_bottom: 2
+h_top: 5
+
+noise_factor: 0.02
+
+wave_jsonl_path: test/waves_test.jsonl
+output_dir: data
+device: cuda
