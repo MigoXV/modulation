@@ -11,7 +11,7 @@ class Validator:
         self.loss_fn = loss_fn
         self.device = device
         
-    def callback(self, model, steps):
+    def callback(self, model, step):
         metrics = validate(model, self.dataloader, self.loss_fn, self.device)
         wandb.log(metrics)
         
