@@ -1,3 +1,4 @@
+import os
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,6 +23,8 @@ NUM_WAVEFORMS = 6000  # 总波形数
 AM_FM_PER_TYPE = 200  # 每种频率的AM/FM波形数
 DIGITAL_MOD_COUNTS = np.array([330, 340, 330])  # 数字调制的波形数，每种频率的波形数
 
+
+
 # 辅助函数，生成载波信号
 def generate_carrier(num_samples):
     """生成载波信号。
@@ -33,6 +36,7 @@ def generate_carrier(num_samples):
         torch.Tensor: 生成的载波信号。
     """
     t = torch.arange(0, num_samples).float() / SAMPLE_RATE
+    t = t.to(device)
     carrier = PEAK_TO_PEAK / 2 * torch.sin(2 * np.pi * CARRIER_FREQ * t).to(device)
     return carrier
 
@@ -49,6 +53,7 @@ def generate_am_waveform(mod_freq, mod_index, num_samples):
         torch.Tensor: 生成的AM调制波形。
     """
     t = torch.arange(0, num_samples).float() / SAMPLE_RATE
+    t = t.to(device)
     modulation = (1 + mod_index * torch.sin(2 * np.pi * mod_freq * t)).to(device)
     carrier = generate_carrier(num_samples)
     return modulation * carrier
@@ -66,6 +71,7 @@ def generate_fm_waveform(mod_freq, mod_index, num_samples):
         torch.Tensor: 生成的FM调制波形。
     """
     t = torch.arange(0, num_samples).float() / SAMPLE_RATE
+    t = t.to(device)
     carrier_phase = torch.cumsum(2 * np.pi * (CARRIER_FREQ + mod_index * torch.sin(2 * np.pi * mod_freq * t)), dim=0)
     fm_wave = torch.sin(carrier_phase).to(device)
     return fm_wave
@@ -82,6 +88,7 @@ def generate_digital_signal(freq, num_samples):
         torch.Tensor: 生成的数字信号。
     """
     t = torch.arange(0, num_samples).float() / SAMPLE_RATE
+    t = t.to(device)
     period = int(SAMPLE_RATE / freq)
     digital_signal = torch.sign(torch.sin(2 * np.pi * freq * t)).to(device)
     return digital_signal
@@ -113,6 +120,7 @@ def generate_fsk_waveform(freq, num_samples):
         torch.Tensor: 生成的FSK调制波形。
     """
     t = torch.arange(0, num_samples).float() / SAMPLE_RATE
+    t = t.to(device)
     freq1 = CARRIER_FREQ - freq
     freq2 = CARRIER_FREQ + freq
     digital_signal = generate_digital_signal(freq, num_samples)
@@ -186,12 +194,15 @@ def generate_all_waveforms():
 
 
 # 示例：生成并绘制波形
-def plot_waveform(img_dir):
+def plot_waveform(img_dir, waveforms):
     """从6种波形种中，每种波形随机选取5个样本并绘图。
 
     Args:
         img_path (str): 文件的保存路径。
     """
+    
+    # 确认目录存在
+    os.makedirs(img_dir, exist_ok=True)
     
     # 从6种波形中，每种波形随机选取5个样本
     selected_idx = torch.randint(0, NUM_WAVEFORMS, (6, 5))
@@ -215,8 +226,12 @@ if __name__ == "__main__":
     # 生成所有的波形，返回的是一个二维张量
     waveforms = generate_all_waveforms()
     
+    # 确认输出目录存在
+    os.makedirs("data", exist_ok=True)
+    
     # 保存波形数据
     torch.save(waveforms, "data/waveforms.pt")
     
     # 从6种波形中，每种波形随机选取5个样本并绘图
+    plot_waveform("data", waveforms)
     

@@ -1,0 +1,20 @@
+
+sample_rate: 320000
+total_samples: 160000
+selected_samples: 128000
+
+carrier_freq: 2000000
+carrier_peak_to_peak: 1.0
+
+ma_bottom: 0.5
+ma_top: 1.0
+
+mf_bottom: 1.0
+mf_top: 5.0
+
+h_bottom: 2
+h_top: 5
+
+wave_jsonl_path: data_feeder/waves.jsonl
+
+device: cuda
