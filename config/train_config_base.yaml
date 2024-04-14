@@ -1,0 +1,40 @@
+# 数据集路径
+data_path: data/dataset.pt
+
+#  模型保存目录和checkpoint路径
+output_dir: save_models
+checkpoint_path: checkpoints
+
+# 测试集大小
+test_size: 0.15
+
+# 数据增强参数
+augment_train_data: False
+augment_percentage: 0.4
+
+# 训练过程参数
+num_train_epochs: 40
+per_device_train_batch_size: 2
+per_device_eval_batch_size: 2
+weight_decay: 0.01
+gradient_accumulation_steps: 8
+learning_rate: 0.00001
+device: cuda
+ckpt_epoch_frequency: 1
+max_grad_norm: -1.0
+
+# 学习率调度器
+scheduler:
+  step_size: 2
+  gamma: 0.1
+
+# 训练策略
+evaluation_strategy: epoch
+logging_dir: ./logs
+save_strategy: epoch
+resume_from_checkpoint: Null
+
+
+# wandb选项
+report_to: "wandb"  # 可选
+wandb_project: "modulation_classification"  # 可选
