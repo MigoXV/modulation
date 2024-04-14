@@ -20,4 +20,6 @@ noise_factor: 0.1
 
 wave_jsonl_path: data_feeder/waves.jsonl
 
+output_dir: data
+
 device: cuda

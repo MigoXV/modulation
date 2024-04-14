@@ -294,14 +294,21 @@ def gene_waves_main(config_path, set=None, wave_dir=None):
         for line in f:
             wave_list.append(json.loads(line))
 
-    print(config)
-    print(wave_list)
+    # print(config)
+    # print(wave_list)
     # 使用信号生成器生成信号
     generator = wave_generator(config)
     waves = generator.gene_waves(wave_list)
 
-    plot_waves(waves, wave_dir, config.sample_rate)
+    # 确认输出目录存在
+    if not os.path.exists(config.output_dir):
+        os.makedirs(config.output_dir)
+        
+    output_path = os.path.join(config.output_dir, "waves.pt")
+    # 保存waves张量
+    torch.save(waves, output_path)
+    # plot_waves(waves, wave_dir, config.sample_rate)
 
 
 if __name__ == "__main__":
-    gene_waves_main("test/generator_config.yml", wave_dir="test/waves2")
+    gene_waves_main("data_feeder/generator_config.yml", wave_dir="test/waves2")
