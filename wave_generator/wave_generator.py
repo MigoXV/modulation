@@ -37,23 +37,20 @@ class wave_generator:
             self.device
         )
 
-    def save_dataset(self, dataset, dataset_dir, dataset_name):
+    def save_dataset(self, data, labels, dataset_dir, dataset_name):
 
         if not os.path.exists(dataset_dir):
             os.makedirs(dataset_dir)
 
         dataset_path = os.path.join(dataset_dir, dataset_name)
-        torch.save(dataset, dataset_path)
+        torch.save((data,labels), dataset_path)
 
-    def gene_dataset(self, wave_list):
+    def gene_data_and_labels(self, wave_list):
 
         labels = self.gene_labels(wave_list)
-        waves = self.gene_waves(wave_list)
+        data = self.gene_waves(wave_list)
 
-        # 将labels和waves打包成数据集
-        dataset = torch.utils.data.TensorDataset(waves, labels)
-
-        return dataset
+        return data, labels
 
     def gene_labels(self, wave_list):
         """通过波形列表生成标签，标签为1维张量"""
@@ -66,12 +63,14 @@ class wave_generator:
             "2psk": 5,
         }
 
-        labels = torch.zeros(sum([wave["num"] for wave in wave_list]))
+        # 初始化标签张量，数据类型为int
+        # labels = torch.zeros(sum([wave["num"] for wave in wave_list]))
+        labels = torch.zeros(sum([wave["num"] for wave in wave_list]), dtype=torch.int64)
         start_idx = 0
         for wave in wave_list:
             labels[start_idx : start_idx + wave["num"]] = label_dict[wave["type"]]
             start_idx += wave["num"]
-
+            
         return labels
 
     def gene_waves(self, wave_list):
@@ -337,11 +336,11 @@ def gene_waves_main(config_path, set=None, wave_dir=None):
     generator = wave_generator(config)
     # waves = generator.gene_waves(wave_list)
 
-    dataset = generator.gene_dataset(wave_list)
-    generator.save_dataset(dataset, config.output_dir, "dataset.pt")
+    data, labels = generator.gene_data_and_labels(wave_list)
+    generator.save_dataset(data, labels, config.output_dir, "dataset.pt")
 
     # plot_waves(waves, wave_dir, config.sample_rate)
 
 
 if __name__ == "__main__":
-    gene_waves_main("data_feeder/generator_config.yml", wave_dir="test/waves2")
+    gene_waves_main("config/generator_config_base.yml", wave_dir="test/waves2")

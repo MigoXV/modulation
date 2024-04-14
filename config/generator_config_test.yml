@@ -18,6 +18,6 @@ h_top: 5
 
 noise_factor: 0.02
 
-wave_jsonl_path: test/waves.jsonl
+wave_jsonl_path: test/waves_test.jsonl
 output_dir: data
 device: cuda

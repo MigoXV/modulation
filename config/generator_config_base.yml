@@ -18,7 +18,7 @@ h_top: 5
 
 noise_factor: 0.1
 
-wave_jsonl_path: data_feeder/waves.jsonl
+wave_jsonl_path: config/waves_base.jsonl
 
 output_dir: data
 
