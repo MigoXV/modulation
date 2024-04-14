@@ -35,14 +35,14 @@ def train_from_scatch(
     datafeeder = DataFeeder(config)
 
     # 加载模型
-    model = WaveTransformerModel(config)
+    model = WaveTransformerModel(config).to(device)
 
     # 损失函数：交叉熵
-    loss_fn = torch.nn.CrossEntropyLoss
+    loss_fn = torch.nn.CrossEntropyLoss()
     
     # 适配器
     def adaptor(batch, model_outputs):
-        return {"logits": model_outputs[0]}
+        return {"losses": loss_fn(model_outputs, batch[1])}
     
     # 创建验证器
     validator = Validator(

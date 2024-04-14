@@ -63,12 +63,14 @@ class wave_generator:
             "2psk": 5,
         }
 
-        labels = torch.zeros(sum([wave["num"] for wave in wave_list]))
+        # 初始化标签张量，数据类型为int
+        # labels = torch.zeros(sum([wave["num"] for wave in wave_list]))
+        labels = torch.zeros(sum([wave["num"] for wave in wave_list]), dtype=torch.int64)
         start_idx = 0
         for wave in wave_list:
             labels[start_idx : start_idx + wave["num"]] = label_dict[wave["type"]]
             start_idx += wave["num"]
-
+            
         return labels
 
     def gene_waves(self, wave_list):

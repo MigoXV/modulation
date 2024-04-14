@@ -8,7 +8,7 @@ log_dir: logs
 
 # 模型参数
 num_layers: 4
-d_model: 256
+d_model: 128
 nhead: 8
 dim_feedforward: 1024
 dropout: 0.1
