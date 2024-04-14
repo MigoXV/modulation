@@ -37,6 +37,43 @@ class wave_generator:
             self.device
         )
 
+    def save_dataset(self, dataset, dataset_dir, dataset_name):
+
+        if not os.path.exists(dataset_dir):
+            os.makedirs(dataset_dir)
+
+        dataset_path = os.path.join(dataset_dir, dataset_name)
+        torch.save(dataset, dataset_path)
+
+    def gene_dataset(self, wave_list):
+
+        labels = self.gene_labels(wave_list)
+        waves = self.gene_waves(wave_list)
+
+        # 将labels和waves打包成数据集
+        dataset = torch.utils.data.TensorDataset(waves, labels)
+
+        return dataset
+
+    def gene_labels(self, wave_list):
+        """通过波形列表生成标签，标签为1维张量"""
+        label_dict = {
+            "cw": 0,
+            "am": 1,
+            "fm": 2,
+            "2ask": 3,
+            "2fsk": 4,
+            "2psk": 5,
+        }
+
+        labels = torch.zeros(sum([wave["num"] for wave in wave_list]))
+        start_idx = 0
+        for wave in wave_list:
+            labels[start_idx : start_idx + wave["num"]] = label_dict[wave["type"]]
+            start_idx += wave["num"]
+
+        return labels
+
     def gene_waves(self, wave_list):
         """生成所有类别的信号和标签，该函数遍历波形数组，返回信号张量和标签"""
 
@@ -298,15 +335,11 @@ def gene_waves_main(config_path, set=None, wave_dir=None):
     # print(wave_list)
     # 使用信号生成器生成信号
     generator = wave_generator(config)
-    waves = generator.gene_waves(wave_list)
+    # waves = generator.gene_waves(wave_list)
 
-    # 确认输出目录存在
-    if not os.path.exists(config.output_dir):
-        os.makedirs(config.output_dir)
-        
-    output_path = os.path.join(config.output_dir, "waves.pt")
-    # 保存waves张量
-    torch.save(waves, output_path)
+    dataset = generator.gene_dataset(wave_list)
+    generator.save_dataset(dataset, config.output_dir, "dataset.pt")
+
     # plot_waves(waves, wave_dir, config.sample_rate)
 
 
