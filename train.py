@@ -72,4 +72,4 @@ def train_from_scatch(
 
 
 if __name__ == "__main__":
-    train_from_scatch("config/train_config_base.yaml")
+    train_from_scatch("config/train_config_test.yaml")

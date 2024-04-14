@@ -23,7 +23,7 @@ augment_train_data: False
 augment_percentage: 0.4
 
 # 训练过程参数
-num_epochs: 200
+num_epochs: 1
 per_device_train_batch_size: 2
 per_device_eval_batch_size: 2
 weight_decay: 0.01
@@ -46,5 +46,5 @@ resume_from_checkpoint: Null
 
 
 # wandb选项
-report_to: "wandb"  # 可选
+report_to: Null  # 可选
 wandb_project: "modulation_classification"  # 可选
