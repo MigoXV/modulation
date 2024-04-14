@@ -1,5 +1,5 @@
 
-sample_rate: 320000
+sample_rate: 32000000
 total_samples: 160000
 selected_samples: 128000
 
@@ -11,9 +11,12 @@ ma_top: 1.0
 
 mf_bottom: 1.0
 mf_top: 5.0
+F_max: 2000
 
 h_bottom: 2
 h_top: 5
+
+noise_factor: 0.1
 
 wave_jsonl_path: data_feeder/waves.jsonl
 

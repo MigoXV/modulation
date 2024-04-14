@@ -112,8 +112,10 @@ class wave_generator:
     def gene_fm(self, wave_group, wave_clip):
         """生成fm信号"""
 
-        modulating_singal = torch.sin(2 * np.pi * wave_group["freq"] * self.t).to(self.device)
-        
+        modulating_singal = torch.sin(2 * np.pi * wave_group["freq"] * self.t).to(
+            self.device
+        )
+
         for index, wave in enumerate(wave_clip):
 
             # 随机生成调制指数
@@ -123,7 +125,11 @@ class wave_generator:
             freq = self.carrier_freq + mf * self.F_max * modulating_singal
 
             # 生成fm信号
-            full_wave = torch.sin(2 * np.pi * freq * self.t).to(self.device)
+            full_wave = (
+                self.carrier_peak_to_peak
+                / 2
+                * torch.sin(2 * np.pi * freq * self.t).to(self.device)
+            )
 
             # 随机化初相
             wave = self.random_phi(full_wave)
@@ -193,7 +199,11 @@ class wave_generator:
             freq = self.carrier_freq + h * wave_group["freq"] * modulating_singal
             freq = freq.to(self.device)
             # 生成2fsk信号
-            full_wave = torch.sin(2 * np.pi * freq * self.t).to(self.device)
+            full_wave = (
+                self.carrier_peak_to_peak
+                / 2
+                * torch.sin(2 * np.pi * freq * self.t).to(self.device)
+            )
 
             # 随机化初相
             wave = self.random_phi(full_wave)
@@ -216,7 +226,7 @@ class wave_generator:
             phase.to(self.device)
 
             # 生成2psk信号
-            full_wave = torch.sin(phase).to(self.device)
+            full_wave = self.carrier_peak_to_peak / 2 * torch.sin(phase).to(self.device)
 
             # 随机化初相
             wave = self.random_phi(full_wave)
@@ -294,4 +304,4 @@ def gene_waves_main(config_path, set=None, wave_dir=None):
 
 
 if __name__ == "__main__":
-    gene_waves_main("test/generator_config.yml", wave_dir="test/waves")
+    gene_waves_main("test/generator_config.yml", wave_dir="test/waves2")

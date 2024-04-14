@@ -16,7 +16,7 @@ F_max: 2000
 h_bottom: 2
 h_top: 5
 
-noise_factor: 0
+noise_factor: 0.02
 
 wave_jsonl_path: test/waves.jsonl
 
