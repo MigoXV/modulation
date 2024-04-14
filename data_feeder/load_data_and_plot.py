@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 
-
+# TODO: 适配新的数据集格式
 if __name__=="__main__":
     
     # 加载数据
