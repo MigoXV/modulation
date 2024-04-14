@@ -29,7 +29,7 @@ class Trainer:
         self.validator = validator
 
         if optimizer is None:
-            torch.optim.AdamW(self.student_model.parameters(), lr=config.learning_rate)
+            self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=config.learning_rate)
         else:
             self.optimizer = optimizer
 
@@ -42,7 +42,6 @@ class Trainer:
             ckpt_epoch_frequency=config.ckpt_epoch_frequency,
             log_dir=config.log_dir,
             output_dir=config.output_dir,
-            device_ids=config.device_ids,
         )  # 设置训练配置，指定设备
 
         self.trainer = BasicTrainer(

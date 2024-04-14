@@ -5,14 +5,19 @@ import torch.nn as nn
 class WaveTransformerModel(nn.Module):
     def __init__(
         self,
-        num_layers=4,
-        d_model=256,
-        nhead=8,
-        dim_feedforward=1024,
-        dropout=0.1,
-        num_classes=6,
+        config,
+
     ):
+        
         super(WaveTransformerModel, self).__init__()
+        
+        d_model = config.d_model
+        nhead = config.nhead
+        num_layers = config.num_layers
+        dim_feedforward = config.dim_feedforward
+        dropout = config.dropout
+        num_classes = config.num_classes
+        
         # 创建一个Transformer编码器层
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=d_model,

@@ -61,12 +61,14 @@ def train_from_scatch(
         validator=validator,
     )
 
-    with wandb.init(project="distill-student", config=OmegaConf.to_container(config, resolve=True)):
-        trainer.train(
-            train_dataloader=datafeeder.train_dataloader,
-            num_epochs=config.num_epochs,
-            max_grad_norm=config.max_grad_norm,
-        )
+    if config.report_to == "wandb":
+        
+        with wandb.init(project=config.wandb_project, config=OmegaConf.to_container(config, resolve=True)):
+            trainer.train(
+                train_dataloader=datafeeder.train_dataloader,
+                num_epochs=config.num_epochs,
+                max_grad_norm=config.max_grad_norm,
+            )
 
 
 if __name__ == "__main__":
