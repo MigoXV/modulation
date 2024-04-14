@@ -25,9 +25,12 @@ class wave_generator:
 
         self.mf_bottom = config.mf_bottom
         self.mf_top = config.mf_top
+        self.F_max = config.F_max
 
         self.h_bottom = config.h_bottom
         self.h_top = config.h_top
+
+        self.noise_factor = config.noise_factor
 
         # 生成时间序列张量供生成波形时使用
         self.t = (torch.arange(0, self.total_samples).float() / self.sample_rate).to(
@@ -46,13 +49,17 @@ class wave_generator:
         start_index = 0
 
         # 遍历波形数组，生成信号
-        for wave_gruop in tqdm(self.wave_list):
+        for wave_gruop in tqdm(wave_list):
 
             # 切片
             wave_clip = waves[start_index : start_index + wave_gruop["num"]]
 
             # 生成波形
             self.gene_wave(wave_gruop, wave_clip)
+
+            start_index += wave_gruop["num"]
+
+        return waves
 
     def gene_wave(self, wave_group, wave_clip):
 
@@ -74,10 +81,12 @@ class wave_generator:
     def gene_am(self, wave_group, wave_clip):
         """生成am信号"""
 
-        for wave in wave_clip:
+        for index, wave in enumerate(wave_clip):
 
             # 随机生成调制指数
-            ma = torch.rand(1) * (self.ma_top - self.ma_bottom) + self.ma_bottom
+            ma = (torch.rand(1) * (self.ma_top - self.ma_bottom) + self.ma_bottom).to(
+                self.device
+            )
 
             # 生成调制信号
             modulation = (
@@ -98,50 +107,52 @@ class wave_generator:
             wave = self.random_phi(full_wave)
 
             # 添加噪声
-            wave = self.add_noise(wave)
+            wave_clip[index] = self.add_noise(wave)
 
     def gene_fm(self, wave_group, wave_clip):
         """生成fm信号"""
 
-        for wave in wave_clip:
+        modulating_singal = torch.sin(2 * np.pi * wave_group["freq"] * self.t).to(self.device)
+        
+        for index, wave in enumerate(wave_clip):
 
             # 随机生成调制指数
             mf = torch.rand(1) * (self.mf_top - self.mf_bottom) + self.mf_bottom
+            mf = mf.to(self.device)
+
+            freq = self.carrier_freq + mf * self.F_max * modulating_singal
 
             # 生成fm信号
-            full_wave = torch.sin(
-                2 * np.pi * wave_group["freq"] * self.t
-                + mf * torch.sin(2 * np.pi * wave_group["freq"] * self.t)
-            ).to(self.device)
+            full_wave = torch.sin(2 * np.pi * freq * self.t).to(self.device)
 
             # 随机化初相
             wave = self.random_phi(full_wave)
 
             # 添加噪声
-            wave = self.add_noise(wave)
+            wave_clip[index] = self.add_noise(wave)
 
     def gene_cw(self, wave_group, wave_clip):
         """生成cw信号"""
 
-        for wave in wave_clip:
+        for index, wave in enumerate(wave_clip):
 
             # 生成cw信号
             full_wave = (
                 self.carrier_peak_to_peak
                 / 2
-                * torch.sin(2 * np.pi * wave_group["freq"] * self.t).to(self.device)
+                * torch.sin(2 * np.pi * self.carrier_freq * self.t).to(self.device)
             )
 
             # 随机化初相
             wave = self.random_phi(full_wave)
 
             # 添加噪声
-            wave = self.add_noise(wave)
+            wave_clip[index] = self.add_noise(wave)
 
     def gene_2ask(self, wave_group, wave_clip):
         """生成2ask信号"""
 
-        for wave in wave_clip:
+        for index, wave in enumerate(wave_clip):
 
             # 生成调制信号，其为方波
             modulation = 0.5 * (
@@ -162,59 +173,67 @@ class wave_generator:
             wave = self.random_phi(full_wave)
 
             # 添加噪声
-            wave = self.add_noise(wave)
+            wave_clip[index] = self.add_noise(wave)
 
     def gene_2fsk(self, wave_group, wave_clip):
-        """生成2fsk信号"""
+        """生成2fsk信号，发送0的载频值等于载波的频率，发送1的载频值等于载波频率呈上(1+h)"""
 
         # 调制信号
-        modulating_singal = torch.sign(torch.sin(2 * np.pi * wave_group["freq"]))
+        modulating_singal = (
+            1 - (torch.sign(torch.sin(2 * np.pi * wave_group["freq"] * self.t)) + 1) / 2
+        ).to(self.device)
 
-        for wave in wave_clip:
+        for index, wave in enumerate(wave_clip):
 
-            # 随机生成调制指数
+            # 随机生成移频键控系数
             h = torch.rand(1) * (self.h_top - self.h_bottom) + self.h_bottom
-            
+            h = h.to(self.device)
+
             # 求出各点的频率
-            freq = 2 * np.pi * self.carrier_freq + h * modulating_singal
-            
+            freq = self.carrier_freq + h * wave_group["freq"] * modulating_singal
+            freq = freq.to(self.device)
             # 生成2fsk信号
-            full_wave = torch.sin(freq * self.t).to(self.device)
+            full_wave = torch.sin(2 * np.pi * freq * self.t).to(self.device)
 
             # 随机化初相
             wave = self.random_phi(full_wave)
 
             # 添加噪声
-            wave = self.add_noise(wave)
+            wave_clip[index] = self.add_noise(wave)
 
     def gene_2psk(self, wave_group, wave_clip):
         """生成2psk信号"""
 
         # 调制信号
-        modulating_singal = torch.sign(torch.sin(2 * np.pi * wave_group["freq"]))
-        
-        for wave in wave_clip:
+        modulating_singal = (
+            1 - (torch.sign(torch.sin(2 * np.pi * wave_group["freq"] * self.t)) + 1) / 2
+        ).to(self.device)
+
+        for index, wave in enumerate(wave_clip):
 
             # 求出各点的相位
             phase = 2 * np.pi * self.carrier_freq * self.t + np.pi * modulating_singal
-            
+            phase.to(self.device)
+
             # 生成2psk信号
             full_wave = torch.sin(phase).to(self.device)
-            
+
             # 随机化初相
             wave = self.random_phi(full_wave)
-            
+
             # 添加噪声
-            wave = self.add_noise(wave)
+            wave_clip[index] = self.add_noise(wave)
 
     def random_phi(self, wave):
         """通过在一个长的固定初相的波形中随机截取固定长度的波形来达到随机初相的效果"""
 
         diff = self.total_samples - self.selected_samples
-        wave = wave[
-            torch.randint(0, diff, (1,)).item() : torch.randint(0, diff, (1,)).item()
-            + self.selected_samples
-        ]
+
+        if diff:
+            start_idx = torch.randint(0, diff, (1,)).item()
+            wave = wave[start_idx : start_idx + self.selected_samples]
+
+        return wave
 
     def add_noise(self, wave):
         """添加噪声"""
@@ -223,7 +242,7 @@ class wave_generator:
         noise = torch.randn(wave.size()).to(self.device)
 
         # 标准化噪声
-        noise = noise / torch.max(torch.abs(noise))
+        noise = noise / torch.max(torch.abs(noise)) * self.noise_factor
 
         # 添加噪声
         wave = wave + noise
@@ -231,7 +250,26 @@ class wave_generator:
         return wave
 
 
-def gene_waves_main(config_path, set=None):
+def plot_waves(waves, wave_dir, sr):
+
+    # 确认输出目录存在
+    if not os.path.exists(wave_dir):
+        os.makedirs(wave_dir)
+
+    t = torch.arange(0, waves.size(1)).float() / sr
+
+    # 遍历波形张量，为每个波形绘制图像
+    for i, wave in enumerate(tqdm(waves)):
+
+        plt.figure(figsize=(12, 8))
+        plt.plot(t, wave.cpu().numpy())
+        plt.xlabel("Time")
+        plt.ylabel("Amplitude")
+        plt.title(f"Wave {i}")
+        plt.savefig(os.path.join(wave_dir, f"wave_{i}.png"))
+
+
+def gene_waves_main(config_path, set=None, wave_dir=None):
 
     # 加载配置文件
     config = OmegaConf.load(config_path)
@@ -249,7 +287,11 @@ def gene_waves_main(config_path, set=None):
     print(config)
     print(wave_list)
     # 使用信号生成器生成信号
+    generator = wave_generator(config)
+    waves = generator.gene_waves(wave_list)
+
+    plot_waves(waves, wave_dir, config.sample_rate)
 
 
 if __name__ == "__main__":
-    gene_waves_main("data_feeder/generator_config.yml")
+    gene_waves_main("test/generator_config.yml", wave_dir="test/waves")

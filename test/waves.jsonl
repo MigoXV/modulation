@@ -1,0 +1,6 @@
+{"type":"am","freq":1000,"num":2}
+{"type":"fm","freq":1000,"num":2}
+{"type":"cw","num":2}
+{"type":"2ask","freq":3000,"num":2}
+{"type":"2fsk","freq":3000,"num":2}
+{"type":"2psk","freq":3000,"num":2}
