@@ -6,14 +6,22 @@ from sklearn.metrics import precision_score, recall_score, f1_score
 
 class Validator:
     
-    def __init__(self,val_dataloader, loss_fn, device):
+    def __init__(self, config, val_dataloader, loss_fn, device):
+        self.config = config
         self.dataloader = val_dataloader
         self.loss_fn = loss_fn
         self.device = device
+        self.epoch = 0
         
     def callback(self, model, step):
         metrics = validate(model, self.dataloader, self.loss_fn, self.device)
-        wandb.log(metrics)
+        log_data = metrics.copy
+        self.epoch += 1
+        log_data["step"] = step
+        log_data["epoch"] = self.epoch
+        print(f"Epoch: {self.epoch}, Step: {step}, Metrics: {metrics}")
+        if self.config.report_to == "wandb":
+            wandb.log(log_data)
         
 def validate(model, dataloader, loss_fn, device):
     model.eval()
