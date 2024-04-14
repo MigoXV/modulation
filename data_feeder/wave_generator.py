@@ -341,4 +341,4 @@ def gene_waves_main(config_path, set=None, wave_dir=None):
 
 
 if __name__ == "__main__":
-    gene_waves_main("test/generator_config.yml", wave_dir="test/waves2")
+    gene_waves_main("config/generator_config_base.yml", wave_dir="test/waves2")
