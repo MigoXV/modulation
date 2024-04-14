@@ -18,8 +18,8 @@ class DataFeeder:
         )
 
         # 创建数据集
-        train_dataset = wave_dataset(train_data, train_labels)
-        val_dataset = wave_dataset(val_data, val_labels)
+        train_dataset = wave_dataset(train_data, train_labels, config)
+        val_dataset = wave_dataset(val_data, val_labels, config)
         
         # 创建数据加载器
         self.train_dataloader = DataLoader(

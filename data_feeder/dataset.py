@@ -1,12 +1,21 @@
 import torch
+import torchaudio
+
 
 class wave_dataset(torch.utils.data.Dataset):
     
-    def __init__(self,waves,labels,transform=None):
+    def __init__(self,waves,labels,config):
+        
+        self.config = config
+        
         self.waves = waves
         self.labels = labels
         
-        self.transform = transform
+        self.transform = torchaudio.transforms.Spectrogram(
+            n_fft=config.n_fft,
+            win_length=config.win_length,
+            hop_length=config.hop_length,
+        )
         
     def __len__(self):
         return len(self.labels)

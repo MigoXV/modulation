@@ -14,6 +14,10 @@ dim_feedforward: 1024
 dropout: 0.1
 num_classes: 6
 
+# 特征工程参数
+n_fft: 256
+win_length: 256
+hop_length: 256
 
 # 测试集大小
 test_size: 0.15
