@@ -46,6 +46,7 @@ def train_from_scatch(
     
     # 创建验证器
     validator = Validator(
+        config=config,
         val_dataloader=datafeeder.val_dataloader,
         loss_fn=loss_fn,
         device=device,
