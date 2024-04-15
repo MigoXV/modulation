@@ -315,13 +315,13 @@ def plot_waves(waves, wave_dir, sr):
         plt.savefig(os.path.join(wave_dir, f"wave_{i}.png"))
 
 
-def gene_waves_main(config_path, set=None, wave_dir=None):
+def gene_waves_main(config_path, config_set=None, wave_dir=None):
 
     # 加载配置文件
     config = OmegaConf.load(config_path)
 
-    if set:
-        config = OmegaConf.merge(config, set)
+    if config_set:
+        config = OmegaConf.merge(config, OmegaConf.from_dotlist(config_set))
 
     # 从config.wave_jsonl_path种加载波形字典
     wave_list = []
@@ -337,7 +337,7 @@ def gene_waves_main(config_path, set=None, wave_dir=None):
     # waves = generator.gene_waves(wave_list)
 
     data, labels = generator.gene_data_and_labels(wave_list)
-    generator.save_dataset(data, labels, config.output_dir, "dataset.pt")
+    generator.save_dataset(data, labels, config.output_dir, config.dataset_name)
 
     # plot_waves(waves, wave_dir, config.sample_rate)
 

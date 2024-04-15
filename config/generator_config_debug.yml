@@ -18,8 +18,8 @@ h_top: 5
 
 noise_factor: 0.1
 
-wave_jsonl_path: config/waves_base.jsonl
+wave_jsonl_path: config/waves_debug.jsonl
 
 output_dir: data
-dataset_name: dataset.pt
+dataset_name: dataset_debug.pt
 device: cuda
