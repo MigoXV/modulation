@@ -20,7 +20,7 @@ win_length: 256
 hop_length: 256
 
 # 测试集大小
-test_size: 0.15
+test_size: 0.9
 
 # 数据增强参数
 augment_train_data: False
@@ -32,10 +32,10 @@ per_device_train_batch_size: 8
 per_device_eval_batch_size: 8
 weight_decay: 0.01
 gradient_accumulation_steps: 8
-learning_rate: 0.0001
+learning_rate: 0.00001
 device: cuda
 ckpt_epoch_frequency: 1
-max_grad_norm: -1.0
+max_grad_norm: 1.0
 
 # 学习率调度器
 scheduler:
