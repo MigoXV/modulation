@@ -24,16 +24,21 @@ class transform_wave(torch.nn.Module):
 
     def forward(self, x):
 
-        t_f_module = torchaudio.transforms.Spectrogram(
+        spectrogram = torchaudio.transforms.Spectrogram(
             n_fft=self.config.n_fft,
             win_length=self.config.win_length,
             hop_length=self.config.hop_length,
             window_fn=Window(self.config),
         )
 
+        spectrogram = spectrogram(x).T[:,1:]
         
+        # 归一化处理：均值为0，方差为1
+        mean = spectrogram.mean()
+        std = spectrogram.std()
+        normalized_spectrogram = (spectrogram - mean) / std
         
-        return t_f_module(x).T[:,1:]
+        return normalized_spectrogram
 
 
 class wave_dataset(torch.utils.data.Dataset):

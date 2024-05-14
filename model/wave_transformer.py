@@ -43,4 +43,7 @@ class WaveTransformerModel(nn.Module):
         output = output[:, -1, :]
         # 通过分类层
         output = self.classifier(output)
+        # softmax
+        output = torch.softmax(output, dim=-1)
+        
         return output

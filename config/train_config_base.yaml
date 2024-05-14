@@ -7,10 +7,10 @@ checkpoint_path: checkpoints
 log_dir: logs
 
 # 模型参数
-num_layers: 4
+num_layers: 1
 d_model: 128
-nhead: 8
-dim_feedforward: 1024
+nhead: 1
+dim_feedforward: 512
 dropout: 0.1
 num_classes: 6
 
@@ -27,12 +27,12 @@ augment_train_data: False
 augment_percentage: 0.4
 
 # 训练过程参数
-num_epochs: 200
-per_device_train_batch_size: 2
-per_device_eval_batch_size: 2
+num_epochs: 10
+per_device_train_batch_size: 8
+per_device_eval_batch_size: 8
 weight_decay: 0.01
 gradient_accumulation_steps: 8
-learning_rate: 0.0001
+learning_rate: 0.0005
 device: cuda
 ckpt_epoch_frequency: 1
 max_grad_norm: -1.0

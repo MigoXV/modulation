@@ -1,5 +1,5 @@
 # 数据集路径
-data_path: data/dataset.pt
+data_path: data/dataset_debug.pt
 
 # 模型保存目录和checkpoint路径
 output_dir: save_models
@@ -20,22 +20,22 @@ win_length: 256
 hop_length: 256
 
 # 测试集大小
-test_size: 0.9
+test_size: 0.5
 
 # 数据增强参数
 augment_train_data: False
 augment_percentage: 0.4
 
 # 训练过程参数
-num_epochs: 5
-per_device_train_batch_size: 8
-per_device_eval_batch_size: 8
+num_epochs: 1
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 1
 weight_decay: 0.01
-gradient_accumulation_steps: 8
-learning_rate: 0.0005
+gradient_accumulation_steps: 1
+learning_rate: 0.0001
 device: cuda
 ckpt_epoch_frequency: 1
-max_grad_norm: 1.0
+max_grad_norm: -1.0
 
 # 学习率调度器
 scheduler:
