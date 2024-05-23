@@ -14,13 +14,9 @@ class Demodulater:
         
     def __call__(self, signal: torch.Tensor, modulation: str) -> torch.Tensor:
         
-        if modulation == 'am':
+        if modulation == 'am' or modulation == '2ask':
             return self.demodulate_am(signal)
-        elif modulation == '2ask':
-            return self.demodulate_am(signal)
-        elif modulation == 'fm':
-            return self.demodulate_fm(signal)
-        elif modulation == '2fsk':
+        elif modulation == 'fm' or modulation == '2fsk':
             return self.demodulate_fm(signal)
         else:
             return self.demodulate_2psk(signal)
@@ -36,6 +32,8 @@ class Demodulater:
         analytic_signal = self.hilbert_transform(signal)
         instantaneous_phase = torch.angle(analytic_signal)
         instantaneous_frequency = torch.diff(instantaneous_phase, dim=-1)
+        # 保证差分后长度不变
+        instantaneous_frequency = torch.cat([instantaneous_frequency, instantaneous_frequency[..., -1:]], dim=-1)
         base_frequency = instantaneous_frequency - self.fc
         return base_frequency
     
