@@ -8,3 +8,5 @@ data
 wandb
 logs
 save_models
+datasets
+outputs
