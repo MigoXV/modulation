@@ -15,11 +15,11 @@ class HilbertTransform(nn.Module):
 
     示例:
         >>> transform = HilbertTransform()
-        >>> signal = torch.rand(10)
+        >>> signal = torch.rand(5, 10)
         >>> transformed_signal = transform(signal)
 
     注:
-        该类仅适用于最后一个维度是时间序列的一维张量。
+        该类适用于最后一个维度是时间序列的一维张量的批次信号。
     """
     def __init__(self):
         """
@@ -32,19 +32,19 @@ class HilbertTransform(nn.Module):
         对输入的信号进行希尔伯特变换。
 
         Args:
-            signal (torch.Tensor): 输入的信号张量。
+            signal (torch.Tensor): 输入的信号张量，形状为 (..., N)，其中 N 是时间序列的长度。
 
         Returns:
-            torch.Tensor: 希尔伯特变换后的信号张量。
+            torch.Tensor: 希尔伯特变换后的信号张量，形状与输入相同。
         """
         # 获取信号的长度
         N = signal.size(-1)
 
         # 计算信号的 FFT
-        fft_signal = torch.fft.fft(signal)
+        fft_signal = torch.fft.fft(signal, dim=-1)
         
         # 创建一个长度为 N 的全零复数张量
-        h = torch.zeros(N, dtype=torch.complex64)
+        h = torch.zeros(N, dtype=torch.complex64, device=signal.device)
 
         # 根据 N 的奇偶性，构造频率响应
         if N % 2 == 0:
@@ -55,5 +55,5 @@ class HilbertTransform(nn.Module):
             h[1:(N+1)//2] = 2
 
         # 应用频率响应，并通过 IFFT 返回时域中的希尔伯特变换信号
-        hilbert_signal = torch.fft.ifft(fft_signal * h)
+        hilbert_signal = torch.fft.ifft(fft_signal * h, dim=-1)
         return hilbert_signal
