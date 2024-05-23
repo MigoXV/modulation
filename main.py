@@ -33,5 +33,18 @@ def gene_wave(
     from wave_generator.wave_generator import gene_waves_main
     gene_waves_main(config_path=config_path, config_set=config_set)
     
+@app.command(name="parse")
+def parse(
+    config_path: str = typer.Argument(
+        "config/generator_config_test.yml", help="Path to config yaml file."
+    ),
+    config_set: Optional[List[str]] = typer.Option(
+        None,
+        help="Specify overrides of config on the command line.",
+    ),
+):
+    from parser import parse_main
+    parse_main(config_path=config_path, config_set=config_set)
+    
 if __name__ == "__main__":
     app()
