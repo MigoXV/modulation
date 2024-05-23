@@ -6,54 +6,80 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-
 # 定义信号生成器类
 class wave_generator:
 
     def __init__(self, config):
-        """初始化信号生成器"""
-        self.sample_rate = config.sample_rate
-        self.total_samples = config.total_samples
-        self.selected_samples = config.selected_samples
-        self.carrier_freq = config.carrier_freq
-        self.carrier_peak_to_peak = config.carrier_peak_to_peak
+        """
+        初始化信号生成器
 
-        self.device = config.device
+        args:
+            config: 配置对象，包含所有必要的参数
+        """
+        self.sample_rate: int = config.sample_rate
+        self.total_samples: int = config.total_samples
+        self.selected_samples: int = config.selected_samples
+        self.carrier_freq: float = config.carrier_freq
+        self.carrier_peak_to_peak: float = config.carrier_peak_to_peak
 
-        self.ma_bottom = config.ma_bottom
-        self.ma_top = config.ma_top
+        self.device: str = config.device
 
-        self.mf_bottom = config.mf_bottom
-        self.mf_top = config.mf_top
-        self.F_max = config.F_max
+        self.ma_bottom: float = config.ma_bottom
+        self.ma_top: float = config.ma_top
 
-        self.h_bottom = config.h_bottom
-        self.h_top = config.h_top
+        self.mf_bottom: float = config.mf_bottom
+        self.mf_top: float = config.mf_top
+        self.F_max: float = config.F_max
 
-        self.noise_factor = config.noise_factor
+        self.h_bottom: float = config.h_bottom
+        self.h_top: float = config.h_top
+
+        self.noise_factor: float = config.noise_factor
 
         # 生成时间序列张量供生成波形时使用
-        self.t = (torch.arange(0, self.total_samples).float() / self.sample_rate).to(
-            self.device
-        )
+        self.t = (torch.arange(0, self.total_samples).float() / self.sample_rate).to(self.device)
 
-    def save_dataset(self, data, labels, dataset_dir, dataset_name):
+    def save_dataset(self, data: torch.Tensor, labels: torch.Tensor, dataset_dir: str, dataset_name: str):
+        """
+        保存数据集
 
+        args:
+            data: 波形数据张量
+            labels: 标签张量
+            dataset_dir: 数据集目录路径
+            dataset_name: 数据集名称
+        returns:
+            None
+        """
         if not os.path.exists(dataset_dir):
             os.makedirs(dataset_dir)
 
         dataset_path = os.path.join(dataset_dir, dataset_name)
-        torch.save((data,labels), dataset_path)
+        torch.save((data, labels), dataset_path)
 
-    def gene_data_and_labels(self, wave_list):
+    def gene_data_and_labels(self, wave_list: list) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        生成数据和标签
 
+        args:
+            wave_list: 波形列表，包含每种波形的参数
+        returns:
+            tuple: 生成的波形数据张量和标签张量
+        """
         labels = self.gene_labels(wave_list)
         data = self.gene_waves(wave_list)
 
         return data, labels
 
-    def gene_labels(self, wave_list):
-        """通过波形列表生成标签，标签为1维张量"""
+    def gene_labels(self, wave_list: list) -> torch.Tensor:
+        """
+        通过波形列表生成标签，标签为1维张量
+
+        args:
+            wave_list: 波形列表
+        returns:
+            torch.Tensor: 生成的标签张量
+        """
         label_dict = {
             "cw": 0,
             "am": 1,
@@ -64,18 +90,23 @@ class wave_generator:
         }
 
         # 初始化标签张量，数据类型为int
-        # labels = torch.zeros(sum([wave["num"] for wave in wave_list]))
         labels = torch.zeros(sum([wave["num"] for wave in wave_list]), dtype=torch.int64)
         start_idx = 0
         for wave in wave_list:
-            labels[start_idx : start_idx + wave["num"]] = label_dict[wave["type"]]
+            labels[start_idx: start_idx + wave["num"]] = label_dict[wave["type"]]
             start_idx += wave["num"]
-            
+
         return labels
 
-    def gene_waves(self, wave_list):
-        """生成所有类别的信号和标签，该函数遍历波形数组，返回信号张量和标签"""
+    def gene_waves(self, wave_list: list) -> torch.Tensor:
+        """
+        生成所有类别的信号和标签，该函数遍历波形数组，返回信号张量和标签
 
+        args:
+            wave_list: 波形列表
+        returns:
+            torch.Tensor: 生成的波形张量
+        """
         # 计算要生成的样本数的综合
         total_num = sum([wave["num"] for wave in wave_list])
 
@@ -88,7 +119,7 @@ class wave_generator:
         for wave_gruop in tqdm(wave_list):
 
             # 切片
-            wave_clip = waves[start_index : start_index + wave_gruop["num"]]
+            wave_clip = waves[start_index: start_index + wave_gruop["num"]]
 
             # 生成波形
             self.gene_wave(wave_gruop, wave_clip)
@@ -97,8 +128,16 @@ class wave_generator:
 
         return waves
 
-    def gene_wave(self, wave_group, wave_clip):
+    def gene_wave(self, wave_group: dict, wave_clip: torch.Tensor):
+        """
+        根据波形类型生成波形
 
+        args:
+            wave_group: 包含波形类型及参数的字典
+            wave_clip: 波形张量的切片
+        returns:
+            None
+        """
         if wave_group["type"] == "am":
             self.gene_am(wave_group, wave_clip)
         elif wave_group["type"] == "fm":
@@ -114,15 +153,20 @@ class wave_generator:
         else:
             raise ValueError("Invalid wave type")
 
-    def gene_am(self, wave_group, wave_clip):
-        """生成am信号"""
+    def gene_am(self, wave_group: dict, wave_clip: torch.Tensor):
+        """
+        生成am信号
 
+        args:
+            wave_group: 包含波形类型及参数的字典
+            wave_clip: 波形张量的切片
+        returns:
+            None
+        """
         for index, wave in enumerate(wave_clip):
 
             # 随机生成调制指数
-            ma = (torch.rand(1) * (self.ma_top - self.ma_bottom) + self.ma_bottom).to(
-                self.device
-            )
+            ma = (torch.rand(1) * (self.ma_top - self.ma_bottom) + self.ma_bottom).to(self.device)
 
             # 生成调制信号
             modulation = (
@@ -145,12 +189,17 @@ class wave_generator:
             # 添加噪声
             wave_clip[index] = self.add_noise(wave)
 
-    def gene_fm(self, wave_group, wave_clip):
-        """生成fm信号"""
+    def gene_fm(self, wave_group: dict, wave_clip: torch.Tensor):
+        """
+        生成fm信号
 
-        modulating_singal = torch.sin(2 * np.pi * wave_group["freq"] * self.t).to(
-            self.device
-        )
+        args:
+            wave_group: 包含波形类型及参数的字典
+            wave_clip: 波形张量的切片
+        returns:
+            None
+        """
+        modulating_singal = torch.sin(2 * np.pi * wave_group["freq"] * self.t).to(self.device)
 
         for index, wave in enumerate(wave_clip):
 
@@ -173,9 +222,16 @@ class wave_generator:
             # 添加噪声
             wave_clip[index] = self.add_noise(wave)
 
-    def gene_cw(self, wave_group, wave_clip):
-        """生成cw信号"""
+    def gene_cw(self, wave_group: dict, wave_clip: torch.Tensor):
+        """
+        生成cw信号
 
+        args:
+            wave_group: 包含波形类型及参数的字典
+            wave_clip: 波形张量的切片
+        returns:
+            None
+        """
         for index, wave in enumerate(wave_clip):
 
             # 生成cw信号
@@ -191,9 +247,16 @@ class wave_generator:
             # 添加噪声
             wave_clip[index] = self.add_noise(wave)
 
-    def gene_2ask(self, wave_group, wave_clip):
-        """生成2ask信号"""
+    def gene_2ask(self, wave_group: dict, wave_clip: torch.Tensor):
+        """
+        生成2ask信号
 
+        args:
+            wave_group: 包含波形类型及参数的字典
+            wave_clip: 波形张量的切片
+        returns:
+            None
+        """
         for index, wave in enumerate(wave_clip):
 
             # 生成调制信号，其为方波
@@ -217,9 +280,16 @@ class wave_generator:
             # 添加噪声
             wave_clip[index] = self.add_noise(wave)
 
-    def gene_2fsk(self, wave_group, wave_clip):
-        """生成2fsk信号，发送0的载频值等于载波的频率，发送1的载频值等于载波频率呈上(1+h)"""
+    def gene_2fsk(self, wave_group: dict, wave_clip: torch.Tensor):
+        """
+        生成2fsk信号，发送0的载频值等于载波的频率，发送1的载频值等于载波频率呈上(1+h)
 
+        args:
+            wave_group: 包含波形类型及参数的字典
+            wave_clip: 波形张量的切片
+        returns:
+            None
+        """
         # 调制信号
         modulating_singal = (
             1 - (torch.sign(torch.sin(2 * np.pi * wave_group["freq"] * self.t)) + 1) / 2
@@ -247,9 +317,16 @@ class wave_generator:
             # 添加噪声
             wave_clip[index] = self.add_noise(wave)
 
-    def gene_2psk(self, wave_group, wave_clip):
-        """生成2psk信号"""
+    def gene_2psk(self, wave_group: dict, wave_clip: torch.Tensor):
+        """
+        生成2psk信号
 
+        args:
+            wave_group: 包含波形类型及参数的字典
+            wave_clip: 波形张量的切片
+        returns:
+            None
+        """
         # 调制信号
         modulating_singal = (
             1 - (torch.sign(torch.sin(2 * np.pi * wave_group["freq"] * self.t)) + 1) / 2
@@ -270,20 +347,32 @@ class wave_generator:
             # 添加噪声
             wave_clip[index] = self.add_noise(wave)
 
-    def random_phi(self, wave):
-        """通过在一个长的固定初相的波形中随机截取固定长度的波形来达到随机初相的效果"""
+    def random_phi(self, wave: torch.Tensor) -> torch.Tensor:
+        """
+        通过在一个长的固定初相的波形中随机截取固定长度的波形来达到随机初相的效果
 
+        args:
+            wave: 波形张量
+        returns:
+            torch.Tensor: 随机初相的波形张量
+        """
         diff = self.total_samples - self.selected_samples
 
         if diff:
             start_idx = torch.randint(0, diff, (1,)).item()
-            wave = wave[start_idx : start_idx + self.selected_samples]
+            wave = wave[start_idx: start_idx + self.selected_samples]
 
         return wave
 
-    def add_noise(self, wave):
-        """添加噪声"""
+    def add_noise(self, wave: torch.Tensor) -> torch.Tensor:
+        """
+        添加噪声
 
+        args:
+            wave: 波形张量
+        returns:
+            torch.Tensor: 添加噪声后的波形张量
+        """
         # 生成噪声
         noise = torch.randn(wave.size()).to(self.device)
 
@@ -296,8 +385,17 @@ class wave_generator:
         return wave
 
 
-def plot_waves(waves, wave_dir, sr):
+def plot_waves(waves: torch.Tensor, wave_dir: str, sr: int):
+    """
+    绘制波形图像并保存
 
+    args:
+        waves: 波形数据张量
+        wave_dir: 波形图像保存目录
+        sr: 采样率
+    returns:
+        None
+    """
     # 确认输出目录存在
     if not os.path.exists(wave_dir):
         os.makedirs(wave_dir)
@@ -315,8 +413,17 @@ def plot_waves(waves, wave_dir, sr):
         plt.savefig(os.path.join(wave_dir, f"wave_{i}.png"))
 
 
-def gene_waves_main(config_path, config_set=None, wave_dir=None):
+def gene_waves_main(config_path: str, config_set: list = None, wave_dir: str = None):
+    """
+    生成波形主函数
 
+    args:
+        config_path: 配置文件路径
+        config_set: 配置文件设置的额外参数
+        wave_dir: 波形图像保存目录
+    returns:
+        None
+    """
     # 加载配置文件
     config = OmegaConf.load(config_path)
 
