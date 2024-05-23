@@ -1,0 +1,29 @@
+# 数据集路径
+data_path: datasets/sim-AD2/dataset.pt
+
+# checkpoint路径
+checkpoint_path: outputs/AD2/save_models/gs790.pkl
+
+device: cuda
+
+# 模型参数
+num_layers: 1
+d_model: 128
+nhead: 1
+dim_feedforward: 512
+dropout: 0.1
+num_classes: 6
+
+
+# 特征工程参数
+n_fft: 256
+win_length: 256
+hop_length: 256
+
+# 测试集大小
+test_size: 1
+
+per_device_train_batch_size: 8
+per_device_eval_batch_size: 8
+
+report_to: Null

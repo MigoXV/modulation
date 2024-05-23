@@ -1,6 +1,8 @@
 import torch
 import wandb
 
+from tqdm import tqdm
+
 from sklearn.metrics import precision_score, recall_score, f1_score
 
 from textbrewer.distiller_utils import move_to_device
@@ -33,7 +35,7 @@ def validate(model, dataloader, loss_fn, device):
     all_labels = []
 
     with torch.no_grad():
-        for batch in dataloader:
+        for batch in tqdm(dataloader):
             batch = move_to_device(batch, device)
             inputs, labels = batch
             # inputs, labels = inputs.to(device), labels.to(device)
