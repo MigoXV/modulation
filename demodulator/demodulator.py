@@ -1,16 +1,13 @@
 import torch
 
 from .hibert import HilbertTransform
-from .classifier import Classifier
 
-class Demodulater:
+class Demodulator:
     
-    def __init__(self, config, ckpt_path: str):
+    def __init__(self):
         
         self.fc=2e6
-        
         self.hilbert_transform = HilbertTransform()
-        self.classifier = Classifier(config, ckpt_path)
         
     def __call__(self, signal: torch.Tensor, modulation: str) -> torch.Tensor:
         
